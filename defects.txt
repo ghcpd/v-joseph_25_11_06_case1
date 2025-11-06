@@ -1,0 +1,19 @@
+1) Documentation references top-level functions/classes that don't exist
+
+Trace (quickstart):
+ImportError: cannot import name 'fetch_remote' from 'datasync' (datasync/__init__.py)
+
+2) CacheManager constructor signature mismatch
+
+Trace (cache example):
+TypeError: CacheManager.__init__() missing 1 required positional argument: 'cache_dir'
+
+3) Advanced example is documented as synchronous but API is async
+
+Trace (advanced example):
+<coroutine object DataSync.sync_all at 0x...>\nRuntimeWarning: coroutine 'DataSync.sync_all' was never awaited
+
+Further notes:
+- The library exposes `DataSync` and `CacheManager` in `__init__.py` but not convenience functions like `fetch_remote` expected by README.
+- The API methods `fetch_remote`, `store`, `get`, `sync_all` are async and README shows synchronous usage.
+
