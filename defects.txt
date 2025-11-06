@@ -1,0 +1,20 @@
+Example: quick_start
+Traceback (most recent call last):
+  File "D:\mins_project\model_test\Documentation & knowledge\1106\S390\test_files\run_readme_examples.py", line 9, in <module>
+    from datasync import fetch_remote
+ImportError: cannot import name 'fetch_remote' from 'datasync' (D:\mins_project\model_test\Documentation & knowledge\1106\S390\datasync\__init__.py)
+
+
+Example: cache_usage
+Traceback (most recent call last):
+  File "D:\mins_project\model_test\Documentation & knowledge\1106\S390\test_files\run_readme_examples.py", line 18, in <module>
+    cache = CacheManager()
+TypeError: CacheManager.__init__() missing 1 required positional argument: 'cache_dir'
+
+
+Example: advanced_example
+sync_all returned a coroutine; should be awaited
+
+Documentation mismatch: Environment variable support
+The README states that setting BASE_URL in a .env file allows skipping the base_url parameter. The implementation in `datasync.core.DataSync` does not read environment variables or .env files; it requires passing `base_url` explicitly. No error is raised, but the documentation is incorrect.
+
