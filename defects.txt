@@ -1,0 +1,26 @@
+Defect 1: README imports non-existent top-level function `fetch_remote`
+Trace:
+    ImportError: cannot import name 'fetch_remote' from 'datasync'
+
+Defect 2: README uses CacheManager synchronously and omits required parameter `cache_dir`
+Trace:
+    TypeError: CacheManager.__init__() missing 1 required positional argument: 'cache_dir'
+
+Defect 3: README suggests `fetch_remote` is synchronous. All network methods are async and must be awaited.
+Trace:
+    # When attempting to call sync.fetch_remote('/data/users') directly you will
+    # get an awaitable or a runtime error because methods are async and should
+    # be run using asyncio.
+
+Defect 4: README suggests .env usage for BASE_URL without built-in support.
+Trace:
+    # The library `datasync` doesn't read .env variables. You must read them in
+    # your code using `os.getenv` or a helper like python-dotenv.
+
+Defect 5: Missing dependency `aiohttp` not installed by default in this workspace
+Trace:
+  File "datasync/core.py", line 2, in <module>
+    import aiohttp
+ModuleNotFoundError: No module named 'aiohttp'
+
+(End of defects)
