@@ -8,12 +8,15 @@ class CacheManager:
 
     async def store(self, key, value):
         await asyncio.sleep(0.05)
-        filename = os.path.join(self.cache_dir, key.replace("/", "_") + ".cache")
+        # sanitize key to filesystem-safe filename: replace everything not alnum or _ with _
+        safe_key = ''.join(c if (c.isalnum() or c in ('_', '-')) else '_' for c in key)
+        filename = os.path.join(self.cache_dir, safe_key.replace("/", "_") + ".cache")
         with open(filename, "w", encoding="utf-8") as f:
             f.write(value)
 
     async def get(self, key):
-        filename = os.path.join(self.cache_dir, key.replace("/", "_") + ".cache")
+        safe_key = ''.join(c if (c.isalnum() or c in ('_', '-')) else '_' for c in key)
+        filename = os.path.join(self.cache_dir, safe_key.replace("/", "_") + ".cache")
         if not os.path.exists(filename):
             return None
         with open(filename, "r", encoding="utf-8") as f:

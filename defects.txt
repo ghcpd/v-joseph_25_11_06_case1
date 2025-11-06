@@ -1,0 +1,42 @@
+Defect 1: README shows `from datasync import fetch_remote` but no top-level function exists.
+Trace: When attempting to import and run the quick-start example as in README, the top-level function `fetch_remote` was not present. The correct usage is to instantiate `DataSync` and call its async methods.
+
+Defect 2: README uses CacheManager.store and .get synchronously. Implementation is async.
+Trace: Using cache_test script demonstrates success only when awaiting.
+
+Defect 3: Missing dependency 'aiohttp' causes ModuleNotFoundError when importing datasync.core.
+Trace (from quick_start test before install):
+Traceback (most recent call last):
+  File "<string>", line 2, in <module>
+    from datasync import DataSync
+  File "d:\mins_project\model_test\Documentation & knowledge\1106\S180-t2\datasync\__init__.py", line 1, in <module>
+    from .core import DataSync
+  File "d:\mins_project\model_test\Documentation & knowledge\1106\S180-t2\datasync\core.py", line 2, in <module>
+    import aiohttp
+ModuleNotFoundError: No module named 'aiohttp'
+
+Defect 4: Cache filenames invalid when endpoint contains query parameters or other characters (e.g., '?').
+Trace (from advanced_test run before fix):
+Traceback (most recent call last):
+  File "<string>", line 12, in <module>
+    asyncio.run(main())
+  File "C:\Python313\Lib\asyncio\runners.py", line 195, in run
+    return runner.run(main)
+  File "C:\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "C:\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+  File "<string>", line 6, in main
+    result = await ds.sync_all({
+  File "d:\mins_project\model_test\Documentation & knowledge\1106\S180-t2\datasync\core.py", line 31, in sync_all
+    result = await self.sync_local(endpoint, path)
+  File "d:\mins_project\model_test\Documentation & knowledge\1106\S180-t2\datasync\core.py", line 22, in sync_local
+    data = await self.fetch_remote(endpoint)
+  File "d:\mins_project\model_test\Documentation & knowledge\1106\S180-t2\datasync\core.py", line 18, in fetch_remote
+    await self.cache.store(endpoint, data)
+  File "d:\mins_project\model_test\Documentation & knowledge\1106\S180-t2\datasync\cache.py", line 12, in store
+    with open(filename, "w", encoding="utf-8") as f:
+OSError: [Errno 22] Invalid argument: 'cache\\get?show=info.cache'
+
+Defect 5: README claims .env support (BASE_URL) but package doesn't implement it.
+Trace: No code reading environment variables in datasync package.
