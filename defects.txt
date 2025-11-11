@@ -1,0 +1,130 @@
+# Defects Found in DataSync Pro v2.0 Tutorial Examples
+
+## Defect 1: Quick Start Example - fetch_remote Import Error
+
+**Location:** README.md, Lines 15-20
+
+**Issue:** The README shows `fetch_remote` as a standalone function that can be imported directly:
+```python
+from datasync import fetch_remote
+data = fetch_remote("/data/users")
+```
+
+**Actual Behavior:** `fetch_remote` is not exported from the `datasync` package. It is a method of the `DataSync` class, not a standalone function.
+
+**Error Trace:**
+```
+Traceback (most recent call last):
+  File "test_example1_quickstart.py", line 2, in <module>
+    from datasync import fetch_remote
+ImportError: cannot import name 'fetch_remote' from 'datasync' (D:\mins_project\model_test\Documentation & knowledge\1106\Cursor_Composer_1\datasync\__init__.py)
+```
+
+**Root Cause:** The `__init__.py` only exports `DataSync` and `CacheManager`, not `fetch_remote`. The `fetch_remote` method exists only as an instance method of `DataSync` class.
+
+---
+
+## Defect 2: Cache Manager Example - Missing Required Parameter
+
+**Location:** README.md, Lines 27-32
+
+**Issue:** The README shows `CacheManager()` being instantiated without any arguments:
+```python
+cache = CacheManager()
+cache.store("users", "{'id': 1}")
+print(cache.get("users"))
+```
+
+**Actual Behavior:** `CacheManager.__init__()` requires a `cache_dir` parameter. It cannot be instantiated without arguments.
+
+**Error Trace:**
+```
+Traceback (most recent call last):
+  File "test_example2_cache.py", line 4, in <module>
+    cache = CacheManager()
+TypeError: CacheManager.__init__() missing 1 required positional argument: 'cache_dir'
+```
+
+**Root Cause:** The `CacheManager` class constructor requires `cache_dir` as a mandatory parameter (see `datasync/cache.py` line 5).
+
+---
+
+## Defect 3: Cache Manager Example - Async Methods Used Synchronously
+
+**Location:** README.md, Lines 27-32
+
+**Issue:** The README shows `cache.store()` and `cache.get()` being called synchronously without `await`:
+```python
+cache.store("users", "{'id': 1}")
+print(cache.get("users"))
+```
+
+**Actual Behavior:** Both `store()` and `get()` are async methods that return coroutines. They must be awaited and called within an async context.
+
+**Error Trace:**
+```
+Store result: <coroutine object CacheManager.store at 0x0000021C53534640>
+Get result: <coroutine object CacheManager.get at 0x0000021C55FA4440>
+<sys>:0: RuntimeWarning: coroutine 'CacheManager.store' was never awaited
+<sys>:0: RuntimeWarning: coroutine 'CacheManager.get' was never awaited
+```
+
+**Root Cause:** Both methods are defined as `async def` in `datasync/cache.py` (lines 9 and 15), but the README shows them being used synchronously.
+
+---
+
+## Defect 4: Advanced Example - Async Method Used Synchronously
+
+**Location:** README.md, Lines 39-48
+
+**Issue:** The README shows `sync.sync_all()` being called synchronously:
+```python
+sync = DataSync("https://api.example.com")
+result = sync.sync_all({
+    "data/users": "output/users.json",
+    "data/info": "output/info.json"
+})
+print(result)
+```
+
+**Actual Behavior:** `sync_all()` is an async method that returns a coroutine. It must be awaited and called within an async context (e.g., using `asyncio.run()`).
+
+**Error Trace:**
+```
+<coroutine object DataSync.sync_all at 0x000001FD98D24640>
+<sys>:0: RuntimeWarning: coroutine 'DataSync.sync_all' was never awaited
+```
+
+**Root Cause:** The `sync_all()` method is defined as `async def` in `datasync/core.py` (line 28), but the README shows it being used synchronously.
+
+---
+
+## Defect 5: Missing Dependency Documentation
+
+**Location:** README.md, Installation section
+
+**Issue:** The README shows `pip install datasync` but the actual package requires `aiohttp` as a dependency, which is not mentioned.
+
+**Actual Behavior:** The package imports `aiohttp` (see `datasync/core.py` line 2) but this dependency is not documented in the README.
+
+**Error Trace (if aiohttp not installed):**
+```
+ModuleNotFoundError: No module named 'aiohttp'
+```
+
+**Root Cause:** Missing dependency documentation. The package requires `aiohttp` and its dependencies but this is not mentioned in the installation instructions.
+
+---
+
+## Summary
+
+Total Defects Found: 5
+
+1. **Import Error:** `fetch_remote` is not a standalone function
+2. **Missing Parameter:** `CacheManager()` requires `cache_dir` argument
+3. **Async/Sync Mismatch:** `CacheManager.store()` and `get()` are async but shown as sync
+4. **Async/Sync Mismatch:** `DataSync.sync_all()` is async but shown as sync
+5. **Missing Documentation:** `aiohttp` dependency not mentioned
+
+All issues stem from the README not accurately reflecting that the library is fully asynchronous and requires proper async/await usage patterns.
+
